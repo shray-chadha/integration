@@ -1,67 +1,89 @@
 package com.shray.automation.intergration.utils;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Properties;
 import javax.mail.Authenticator;
-import javax.mail.PasswordAuthentication;
+import javax.mail.Folder;
+import javax.mail.Header;
+import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.search.SearchTerm;
 
 public class Utilities {
 	
 	public String mode;
-	public Properties properties;
 	
 	public Utilities (String mode) {
 		this.mode = mode;
-		this.properties = new Properties();
-		try {
-			properties.load(new FileInputStream(System.getProperty("user.dir")+"//config//integration.properties"));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
-	
-	
-	
-	public Properties getSessionProperties () {
-		Properties sProperties = null;
-		if(mode.equals("gsuite")) {
-			sProperties = new Properties();
+			
+	public Properties getProperties (String load) {
+		Properties prop = new Properties();
 			try {
-				sProperties.load(new FileInputStream(System.getProperty("user.dir")+"//config//gsuite.properties"));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
+				prop.load(new FileInputStream(System.getProperty("user.dir")+"//config//"+load+".properties"));
+			
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			return sProperties;
-		}
-		return sProperties;
+			return prop;
 	}
 	
 	
-	public Authenticator getAuthenticator () {
-		Authenticator sessionAuth = null;
-		if(mode.equals("gsuite")) {
-			sessionAuth = new Authenticator() {
-				protected PasswordAuthentication getPasswordAuthentication() {
-					return new PasswordAuthentication(properties.getProperty("gsuite.sender.email.id"), properties.getProperty("gsuite.sender.password"));
-				}
-			};
-			return sessionAuth;
-		}
-		return sessionAuth;
-	}
-	
-	
+			
 	public Session getSession (Properties sProp, Authenticator sAuth) {
 		Session session = Session.getDefaultInstance(sProp, sAuth);
 		return session;
 	}
 	
+	
+	public HashMap<String, String> getAllHeaders (String emailSubject, Folder folder){
+		
+		final String subject = emailSubject;
+		HashMap<String, String> messageHeaders = new HashMap<String, String>();
+        SearchTerm searchCondition = new SearchTerm() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+            public boolean match(Message message) {
+                try {
+                    if (message.getSubject().contains(subject)) {
+                        return true;
+                    }
+                } catch (MessagingException ex) {
+                    ex.printStackTrace();
+                }
+                return false;
+            }
+        };
+        
+        try {
+			Message[] foundMessages = folder.search(searchCondition);
+			if(foundMessages.length==0) {
+				System.out.println("No messages were found for the provided subject");
+			}
+			if(foundMessages.length>1) {
+				System.out.println("More than one messages found with");
+			}
+			
+			
+			Enumeration allHeaders = foundMessages[0].getAllHeaders();
+	        while (allHeaders.hasMoreElements()) {
+	            Header header = (Header) allHeaders.nextElement();
+	            String headerName = header.getName();
+	            String headerVal = header.getValue();
+
+	            messageHeaders.put(headerName, headerVal);
+	            
+	        }
+		} catch (MessagingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+        return messageHeaders;
+	}
 
 }

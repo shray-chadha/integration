@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite guice-stage="DEVELOPMENT" name="Failed suite [Parallel test suite]" data-provider-thread-count="5">
+  <test name="Integration 1">
+    <classes>
+      <class name="com.shray.automation.intergration.stepdefinitions.MailStepDefinition"/>
+    </classes>
+  </test> <!-- Integration 1 -->
+</suite> <!-- Failed suite [Parallel test suite] -->

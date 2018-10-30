@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Integration Suite" data-provider-thread-count="5">
+  <test name="Integration 1">
+    <classes>
+      <class name="com.shray.automation.intergration.stepdefinitions.MailStepDefinition"/>
+    </classes>
+  </test>
+</suite>
